@@ -52,13 +52,37 @@ type Response struct {
 	Cod      int    `json:"cod"`
 }
 
-func GetCity() string {
+func PromptUser() {
 	fmt.Printf("Type in a city for it's weather > ")
+}
+
+func AskAgain() {
+	fmt.Printf("Another city? y/n > ")
+
+	reader := bufio.NewReader(os.Stdin)
+	answer, _ := reader.ReadString('\n')
+	switch answer[0] {
+	case 'y':
+		GetCity()
+	case 'Y':
+		GetCity()
+	case 'n':
+		os.Exit(3)
+	case 'N':
+		os.Exit(3)
+	default:
+		AskAgain()
+	}
+}
+
+func GetCity() {
+	PromptUser()
 
 	reader := bufio.NewReader(os.Stdin)
 	city, _ := reader.ReadString('\n')
 	city = city[:len(city)-1]
-	return city
+	fmt.Println(FetchWeatherData(city))
+	AskAgain()
 }
 
 func FetchWeatherData(city string) string {
@@ -66,6 +90,7 @@ func FetchWeatherData(city string) string {
 
 	//response in is bytes format
 	response, err := http.Get(url)
+	response.Header.Add("Accept", "application/json")
 
 	if err != nil {
 		fmt.Print(err.Error())

@@ -1,7 +1,13 @@
 package weather
 
-import "testing"
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
 
 func TestFetchWeatherData(t *testing.T) {
-	expect :=
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
+
+
 }
