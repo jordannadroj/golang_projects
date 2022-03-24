@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
 	"log"
+
+	"github.com/joho/godotenv"
+
 	// can alias the package with something shorter, i.e. wet
 	wet "weather/weather"
 )
@@ -13,5 +15,5 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	wet.GetCity()
+	wet.Run()
 }
