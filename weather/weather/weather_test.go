@@ -1,43 +1,20 @@
 package weather
 
 import (
-	"fmt"
-	"github.com/stretchr/testify/require"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
-func TestFetchWeatherData(t *testing.T) {
-	//server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
-	testCases := []struct {
-		name    string
-		city    string
-		jordan  func()
-		wantErr bool
-	}{
-		{
-			"passes",
-			"berlin",
-			func() {
-				fmt.Println("HI")
-			},
-			false,
-		},
-		{
-			"error",
-			"berlins",
-			func() {},
-			true,
-		},
-	}
-	for _, tc := range testCases {
+func TestGetWeatherData(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`WeatherData{CityName: "berlin", Temp: 9.5}`))
+	}))
+	defer server.Close()
 
-		tc.jordan()
-
-		_, err := FetchWeatherData(tc.city)
-		if tc.wantErr {
-			require.Error(t, err, tc.name)
-		} else {
-			require.Nil(t, err, tc.name)
-		}
+	weatherData, _ := GetWeatherData("berlin")
+	if weatherData.Temp != 9.5 {
+		t.Errorf("Expected 9.5 but got %v", weatherData.Temp)
 	}
 }

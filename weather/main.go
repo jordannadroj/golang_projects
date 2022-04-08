@@ -24,23 +24,11 @@ func Run() string {
 	view.PromptUser()
 	city := view.GetCity()
 
-	currentCity := wet.Location{CityName: city}
-
-	response, err := currentCity.CallWeatherApi()
+	weatherData, err := wet.GetWeatherData(city)
 	if err != nil {
-		log.Fatal("error calling API")
+		log.Fatal("error retrieving weather data")
 	}
 
-	responseData, err := wet.ReadResponseBody(response)
-	if err != nil {
-		log.Fatal("error reading response body")
-	}
-
-	responseObject, err := wet.UnmarshalResponse(responseData)
-	if err != nil {
-		log.Fatal("error unmarshal response body")
-	}
-
-	return wet.Temperature(city, responseObject)
+	return wet.Temperature(weatherData)
 
 }
