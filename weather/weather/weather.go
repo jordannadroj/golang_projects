@@ -1,62 +1,23 @@
 package weather
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 )
 
-func Run() {
-	PromptUser()
-	city := GetCity()
-
-	response, err := CallWeatherApi(city)
-	if err != nil {
-		log.Fatal("error calling API")
-	}
-
-	responseData, err := ReadResponseBody(response)
-	if err != nil {
-		log.Fatal("error reading response body")
-	}
-
-	responseObject, err := UnmarshalResponse(responseData)
-	if err != nil {
-		log.Fatal("error unmarshal response body")
-	}
-
-	fmt.Println(Temperature(city, responseObject))
-	PromptUserAgain()
-
+type Weather interface {
+	CallWeatherApi() (*http.Response, error)
 }
 
-func PromptUser() {
-	fmt.Printf("Type in a city for it's weather > ")
+type Location struct {
+	CityName string
 }
 
-func PromptUserAgain() {
-	fmt.Printf("Type in a city for it's weather or press enter to exit > ")
-	reader := bufio.NewReader(os.Stdin)
-	response, _ := reader.ReadString('\n')
-	if len(response) == 1 {
-		os.Exit(2)
-	}
-
-}
-
-func GetCity() string {
-	reader := bufio.NewReader(os.Stdin)
-	city, _ := reader.ReadString('\n')
-	city = city[:len(city)-1]
-	return city
-}
-
-func CallWeatherApi(city string) (*http.Response, error) {
-	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?q=%v&units=metric&&appid=%v", city, os.Getenv("WEATHER_APIKEY"))
+func (city *Location) CallWeatherApi() (*http.Response, error) {
+	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?q=%v&units=metric&&appid=%v", city.CityName, os.Getenv("WEATHER_APIKEY"))
 
 	//response in is bytes format
 	response, err := http.Get(url)
