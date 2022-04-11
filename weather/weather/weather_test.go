@@ -2,6 +2,7 @@ package weather
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -68,5 +69,19 @@ func TestGetWeatherData(t *testing.T) {
 				t.Errorf("expected %v, but got %v", tc.expectedErr, err)
 			}
 		})
+	}
+}
+
+func TestTemperature(t *testing.T) {
+	weatherData := WeatherData{
+		CityName: "Berlin",
+		Temp:     5.43,
+	}
+	expect := fmt.Sprintf("The current temperature in %s is %v°C", weatherData.CityName, weatherData.Temp)
+
+	actual := Temperature(&weatherData)
+
+	if expect != actual {
+		t.Errorf("Expected %q, but got %q", expect, actual)
 	}
 }
