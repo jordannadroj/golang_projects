@@ -11,6 +11,8 @@ import (
 	wet "weather/weather"
 )
 
+const URL = "https://api.openweathermap.org/data/2.5"
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -24,7 +26,7 @@ func Run() string {
 	view.PromptUser()
 	city := view.GetCity()
 
-	weatherData, err := wet.GetWeatherData(city)
+	weatherData, err := wet.GetWeatherData(URL, city)
 	if err != nil {
 		log.Fatal("error retrieving weather data")
 	}
