@@ -2,6 +2,7 @@ package weather
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -13,6 +14,8 @@ type WeatherData struct {
 	Temp     float64
 }
 
+var ErrBadRequest = errors.New("bad request")
+
 func GetWeatherData(url, cityName string) (*WeatherData, error) {
 	api := fmt.Sprintf("%s/weather?q=%v&units=metric&&appid=%v", url, cityName, os.Getenv("WEATHER_APIKEY"))
 
@@ -21,16 +24,16 @@ func GetWeatherData(url, cityName string) (*WeatherData, error) {
 	response.Header.Add("Accept", "application/json")
 
 	if err != nil {
-		return nil, err
+		return nil, ErrBadRequest
 	}
 
 	responseData, err := readResponseBody(response)
 	if err != nil {
-		return nil, err
+		return nil, ErrBadRequest
 	}
 	weatherData, err := unmarshalResponse(responseData)
 	if err != nil {
-		return nil, err
+		return nil, ErrBadRequest
 	}
 	return weatherData, nil
 }
