@@ -8,6 +8,6 @@ type HTTPClient interface {
 
 type HTTPClientReal struct{}
 
-func (_ *HTTPClientReal) Get(url string) (resp *http.Response, err error) {
+func (_ HTTPClientReal) Get(url string) (resp *http.Response, err error) {
 	return http.Get(url)
 }
