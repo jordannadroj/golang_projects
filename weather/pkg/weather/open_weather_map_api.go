@@ -10,6 +10,7 @@ import (
 
 const BASE_URL = "https://api.openweathermap.org/data/2.5"
 
+// the enrire API response as a struct. I have commented out what we do not need and only included the data we care about.
 type OpenWeatherMapAPIResponse struct {
 	//Coord struct {
 	//	Lon float64 `json:"lon"`
@@ -79,7 +80,7 @@ func (i *OpenWeatherMapAPI) Get(cityName string) (*WeatherData, error) {
 	return i.createWeatherData(parsedData), nil
 }
 
-// Technically I could just retun this and not go the extra step to return WeatherData, because I cherry picked the data I wanted from the OpenWeatherMapAPIResponse.
+// Technically I could just return this and not go the extra step to return WeatherData, because I cherry-picked the data I wanted from the OpenWeatherMapAPIResponse.
 //However, since WeatherData is our model, we want this data form to be consistent regardless of where we get the original data.
 func (_ *OpenWeatherMapAPI) parseResponse(responseBody *io.ReadCloser) (*OpenWeatherMapAPIResponse, error) {
 	responseData, err := ioutil.ReadAll(*responseBody)
