@@ -1,10 +1,11 @@
-package weather
+package accu_weather
 
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"weather/pkg/weather"
 )
 
 // make first call to get location key, grab location key
@@ -27,45 +28,46 @@ type AccuWeatherAPIWeatherResponse []struct {
 
 type AccuWeatherAPI struct {
 	apiKey     string
-	httpClient HTTPClient
+	httpClient weather.HTTPClient
 }
 
-func NewAccuWeatherApi(apiKey string, httpClient HTTPClient) *AccuWeatherAPI {
+func NewAccuWeatherApi(apiKey string, httpClient weather.HTTPClient) *AccuWeatherAPI {
 	return &AccuWeatherAPI{
 		apiKey:     apiKey,
 		httpClient: httpClient,
 	}
 }
 
-func (i *AccuWeatherAPI) Get(cityName string) (*WeatherData, error) {
+//TODO: Refactor this into smaller functions similar to openweather map
+func (i *AccuWeatherAPI) Get(cityName string) (*weather.WeatherData, error) {
 	locationUrl := fmt.Sprintf("%s/locations/v1/cities/search?apikey=%v&q=%s", ACCU_URL, i.apiKey, cityName)
 	locationResponse, err := http.Get(locationUrl)
 	if err != nil {
-		return nil, ErrInternalServer
+		return nil, weather.ErrInternalServer
 	}
 
 	locationResponseData, err := ioutil.ReadAll(locationResponse.Body)
 	var locationKeys AccuWeatherAPILocationKeyResponse
 	err = json.Unmarshal(locationResponseData, &locationKeys)
 	if err != nil {
-		return nil, ErrInternalServer
+		return nil, weather.ErrInternalServer
 	}
 
 	//	now use location key to call accuweather data, with first index of locationKey
 	weatherUrl := fmt.Sprintf("%s/currentconditions/v1/%s?apikey=%s", ACCU_URL, locationKeys[0].Key, i.apiKey)
 	weatherResponse, err := http.Get(weatherUrl)
 	if err != nil {
-		return nil, ErrInternalServer
+		return nil, weather.ErrInternalServer
 	}
 
 	weatherResponseData, err := ioutil.ReadAll(weatherResponse.Body)
 	var accuWeatherData AccuWeatherAPIWeatherResponse
 	err = json.Unmarshal(weatherResponseData, &accuWeatherData)
 	if err != nil {
-		return nil, ErrInternalServer
+		return nil, weather.ErrInternalServer
 	}
 
-	return &WeatherData{
+	return &weather.WeatherData{
 		CityName: cityName,
 		Temp:     accuWeatherData[0].Temperature.Metric.Value,
 	}, nil

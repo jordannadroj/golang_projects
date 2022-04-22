@@ -8,5 +8,5 @@ type WeatherData struct {
 }
 
 var ErrCityNotFound = errors.New("city not found")
-var ErrBadRequest = errors.New("bad request")
+var ErrUnauthorized = errors.New("unauthorized request")
 var ErrInternalServer = errors.New("internal server error")

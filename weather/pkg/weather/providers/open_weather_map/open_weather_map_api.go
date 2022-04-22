@@ -1,16 +1,16 @@
-package weather
+package open_weather_map
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
+	"weather/pkg/weather"
 )
 
 const BASE_URL = "https://api.openweathermap.org/data/2.5"
 
-// the enrire API response as a struct. I have commented out what we do not need and only included the data we care about.
+// the enrtre API response as a struct. I have commented out what we do not need and only included the data we care about.
 type OpenWeatherMapAPIResponse struct {
 	//Coord struct {
 	//	Lon float64 `json:"lon"`
@@ -55,26 +55,34 @@ type OpenWeatherMapAPIResponse struct {
 
 type OpenWeatherMapAPI struct {
 	apiKey     string
-	httpClient HTTPClient
+	httpClient weather.HTTPClient
 }
 
-func NewOpenWeatherMapAPI(apiKey string, httpClient HTTPClient) *OpenWeatherMapAPI {
+// builds a new OpenWeatherMapAPI
+func NewOpenWeatherMapAPI(apiKey string, httpClient weather.HTTPClient) *OpenWeatherMapAPI {
+
 	return &OpenWeatherMapAPI{
 		apiKey:     apiKey,
 		httpClient: httpClient,
 	}
 }
 
-func (i *OpenWeatherMapAPI) Get(cityName string) (*WeatherData, error) {
+func (i *OpenWeatherMapAPI) Get(cityName string) (*weather.WeatherData, error) {
 	url := fmt.Sprintf("%s/weather?q=%v&units=metric&&appid=%v", BASE_URL, cityName, i.apiKey)
-	response, err := http.Get(url)
+	response, err := i.httpClient.Get(url)
 	if err != nil {
-		return nil, ErrInternalServer
+		return nil, weather.ErrInternalServer
+	}
+	switch response.StatusCode {
+	case 401:
+		return nil, weather.ErrUnauthorized
+	case 404:
+		return nil, weather.ErrCityNotFound
 	}
 
 	parsedData, err := i.parseResponse(&response.Body)
 	if err != nil {
-		return nil, ErrInternalServer
+		return nil, weather.ErrInternalServer
 	}
 
 	return i.createWeatherData(parsedData), nil
@@ -96,8 +104,8 @@ func (_ *OpenWeatherMapAPI) parseResponse(responseBody *io.ReadCloser) (*OpenWea
 	return &responseObject, nil
 }
 
-func (_ *OpenWeatherMapAPI) createWeatherData(result *OpenWeatherMapAPIResponse) *WeatherData {
-	return &WeatherData{
+func (_ *OpenWeatherMapAPI) createWeatherData(result *OpenWeatherMapAPIResponse) *weather.WeatherData {
+	return &weather.WeatherData{
 		CityName: result.Name,
 		Temp:     result.Main.Temp,
 	}
