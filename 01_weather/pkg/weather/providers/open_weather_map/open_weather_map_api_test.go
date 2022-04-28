@@ -9,9 +9,15 @@ import (
 	"weather/pkg/weather"
 )
 
+// this is not thread safe
+// race condition
 var getRequestFunc func(url string) (*http.Response, error)
 
-type getClientMock struct{}
+// satisfies the httpInterface
+type getClientMock struct {
+	//	StatusCode
+	//	Body
+}
 
 func (cm getClientMock) Get(url string) (*http.Response, error) {
 	response, err := getRequestFunc(url)
@@ -24,6 +30,8 @@ var fakeOpenWeatherApi = OpenWeatherMapAPI{
 }
 
 func TestOpenWeatherMapAPI_Get(t *testing.T) {
+	// this is the mock
+	// use unique instances of getClientMock
 	getRequestFunc = func(url string) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
@@ -53,7 +61,7 @@ func TestOpenWeatherMapAPI_GetWithInvalidCity(t *testing.T) {
 	assert.EqualValues(t, weather.ErrCityNotFound, err)
 }
 
-func TestOpenWeatherMapAPI_GetInavlidAPIKey(t *testing.T) {
+func TestOpenWeatherMapAPI_GetInvalidAPIKey(t *testing.T) {
 	getRequestFunc = func(url string) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusUnauthorized,
