@@ -2,6 +2,7 @@ package open_weather_map
 
 import (
 	"github.com/stretchr/testify/assert"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -13,10 +14,10 @@ import (
 // race condition
 var getRequestFunc func(url string) (*http.Response, error)
 
-// satisfies the httpInterface
+// satisfies the httpInterface. So I can mock Get
 type getClientMock struct {
-	//	StatusCode
-	//	Body
+	StatusCode int
+	Body       io.Reader
 }
 
 func (cm getClientMock) Get(url string) (*http.Response, error) {
@@ -25,19 +26,22 @@ func (cm getClientMock) Get(url string) (*http.Response, error) {
 }
 
 var fakeOpenWeatherApi = OpenWeatherMapAPI{
-	apiKey:     "any",
-	httpClient: getClientMock{},
+	apiKey: "any",
+	httpClient: getClientMock{
+		StatusCode: 200,
+		Body:       ioutil.NopCloser(strings.NewReader(`{"main":{"temp":12.25},"name":"Berlin"}`)),
+	},
 }
 
 func TestOpenWeatherMapAPI_Get(t *testing.T) {
-	// this is the mock
+	// this is the mock of the response I want
 	// use unique instances of getClientMock
-	getRequestFunc = func(url string) (*http.Response, error) {
-		return &http.Response{
-			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"main":{"temp":12.25},"name":"Berlin"}`)),
-		}, nil
-	}
+	//getRequestFunc = func(url string) (*http.Response, error) {
+	//	return &http.Response{
+	//		StatusCode: http.StatusOK,
+	//		Body:       ioutil.NopCloser(strings.NewReader(`{"main":{"temp":12.25},"name":"Berlin"}`)),
+	//	}, nil
+	//}
 
 	response, err := fakeOpenWeatherApi.Get("Berlin")
 	assert.NotNil(t, response)

@@ -4,7 +4,7 @@ import "net/http"
 
 type HTTPClientReal struct{}
 
-//main http interface
+// main http interface
 type HTTPClient interface {
 	Get(url string) (resp *http.Response, err error)
 }
