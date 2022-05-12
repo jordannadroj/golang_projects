@@ -32,7 +32,7 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fileServer := http.FileServer(http.Dir("../web_server")) // .Dir specifies the directory tree of the files to be used
+	fileServer := http.FileServer(http.Dir("../02_web_server")) // .Dir specifies the directory tree of the files to be used
 
 	http.Handle("/", fileServer)          // create a handle to see root page to server
 	http.HandleFunc("/form", formHandler) // handle /form route
