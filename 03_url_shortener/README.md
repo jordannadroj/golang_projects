@@ -2,6 +2,11 @@
 
 This is project 3 of my 52 in 52 golang projects. This url shortener project was done based on the tutorial from [eddywm](https://github.com/eddywm/go-shortener-wm)
 
+##Tech Stack
+- GO
+- Redis
+- [Gin](https://github.com/gin-gonic/gin)
+
 ## Install
 
 ### Clone the repository
