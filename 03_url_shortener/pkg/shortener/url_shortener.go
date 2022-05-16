@@ -3,7 +3,6 @@ package shortener
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/itchyny/base58-go"
 	"math/big"
 	"os"
@@ -25,13 +24,8 @@ func base58Encoded(bytes []byte) string {
 	return string(encoded)
 }
 
-/*
-Here userId is added to prevent providing similar shortened urls to separate users in case they want to shorten exact same link, it's a design decision, so some implementations do this differently.
-*/
-
 func GenerateShortLink(initialLink string) string {
-	randomId := uuid.New()
-	urlHashBytes := sha256Of(initialLink + randomId.String())
+	urlHashBytes := sha256Of(initialLink)
 	generatedNumber := new(big.Int).SetBytes(urlHashBytes).Uint64()
 	finalString := base58Encoded([]byte(fmt.Sprintf("%d", generatedNumber)))
 	return finalString[:8]
