@@ -1,29 +1,74 @@
 package store
 
 import (
+	"github.com/alicebob/miniredis/v2"
+	"github.com/go-redis/redis"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-var testStoreService = &StorageService{}
-
-func init() {
-	testStoreService = InitializeStore()
-}
-
 func TestStoreInit(t *testing.T) {
-	assert.True(t, testStoreService.redisClient != nil)
+	s := miniredis.RunT(t)
+	assert.True(t, s != nil)
 }
 
-func TestInsertionAndRetrieval(t *testing.T) {
-	initialLink := "https://www.guru3d.com/news-story/spotted-ryzen-threadripper-pro-3995wx-processor-with-8-channel-ddr4,2.html"
+//TODO: refactor
+func TestSaveUrlMapping(t *testing.T) {
+	initialLink := "https://github.com/jordannadroj/52_in_52/tree/main/03_url_shortener"
 	shortURL := "Jsz4k57oAX"
+	miniRedis := miniredis.RunT(t)
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     miniRedis.Addr(),
+		Password: "",
+		DB:       0,
+	})
+	storeService := StorageService{redisClient: redisClient}
 
 	// Persist data mapping
-	SaveUrlMapping(shortURL, initialLink)
+	err := SaveUrlMapping(shortURL, initialLink, &storeService)
 
 	// Retrieve initial URL
-	retrievedUrl := RetrieveInitialUrl(shortURL)
+	got, _ := miniRedis.Get(shortURL)
+
+	assert.Equal(t, initialLink, got)
+	assert.NoError(t, err)
+}
+
+func TestSaveUrlMapping_error(t *testing.T) {
+	initialLink := "https://github.com/jordannadroj/52_in_52/tree/main/03_url_shortener"
+	shortURL := ""
+	miniRedis := miniredis.RunT(t)
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     miniRedis.Addr(),
+		Password: "",
+		DB:       0,
+	})
+	storeService := StorageService{redisClient: redisClient}
+
+	// Persist data mapping
+	err := SaveUrlMapping(shortURL, initialLink, &storeService)
+
+	// Retrieve initial URL
+	got, _ := miniRedis.Get(shortURL)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", got)
+
+}
+
+func TestRetrieveInitialUrl(t *testing.T) {
+	initialLink := "https://github.com/jordannadroj/52_in_52/tree/main/03_url_shortener"
+	shortURL := "Jsz4k57oAX"
+	miniRedis := miniredis.RunT(t)
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     miniRedis.Addr(),
+		Password: "",
+		DB:       0,
+	})
+	storeService := StorageService{redisClient: redisClient}
+	miniRedis.Set(shortURL, initialLink)
+
+	retrievedUrl, _ := RetrieveInitialUrl(shortURL, &storeService)
 
 	assert.Equal(t, initialLink, retrievedUrl)
 }
