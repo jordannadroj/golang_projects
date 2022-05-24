@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"url_shortener/handler"
 	"url_shortener/store"
 )
@@ -14,7 +15,7 @@ func main() {
 	store := store.InitializeStore(store.Config{})
 
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"message": "Welcome to the URL Shortener API",
 		})
 	})
