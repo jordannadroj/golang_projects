@@ -28,10 +28,12 @@ func TestSaveUrlMapping(t *testing.T) {
 	err := SaveUrlMapping(shortURL, initialLink, &storeService)
 
 	// Retrieve initial URL
-	got, _ := miniRedis.Get(shortURL)
+	got, errRedis := miniRedis.Get(shortURL)
+	assert.NoError(t, errRedis)
 
 	assert.Equal(t, initialLink, got)
 	assert.NoError(t, err)
+
 }
 
 func TestSaveUrlMapping_error(t *testing.T) {
@@ -49,7 +51,8 @@ func TestSaveUrlMapping_error(t *testing.T) {
 	err := SaveUrlMapping(shortURL, initialLink, &storeService)
 
 	// Retrieve initial URL
-	got, _ := miniRedis.Get(shortURL)
+	got, errRedis := miniRedis.Get(shortURL)
+	assert.Error(t, errRedis)
 
 	assert.Error(t, err)
 	assert.Equal(t, "", got)
@@ -66,9 +69,11 @@ func TestRetrieveInitialUrl(t *testing.T) {
 		DB:       0,
 	})
 	storeService := StorageService{redisClient: redisClient}
-	miniRedis.Set(shortURL, initialLink)
+	errRedis := miniRedis.Set(shortURL, initialLink)
+	assert.NoError(t, errRedis)
 
-	retrievedUrl, _ := RetrieveInitialUrl(shortURL, &storeService)
+	retrievedUrl, err := RetrieveInitialUrl(shortURL, &storeService)
 
 	assert.Equal(t, initialLink, retrievedUrl)
+	assert.NoError(t, err)
 }
