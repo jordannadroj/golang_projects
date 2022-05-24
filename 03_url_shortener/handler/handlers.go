@@ -56,5 +56,5 @@ func HandleShortUrlRedirect(c *gin.Context, s *store.StorageService) {
 	}
 	// retrieve the original URL via the short URL key
 	// redirects to the path of the original url
-	c.Redirect(302, initialUrl)
+	c.Redirect(http.StatusFound, initialUrl)
 }
