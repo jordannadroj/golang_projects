@@ -52,7 +52,7 @@ func InitializeStore(cfg Config) *StorageService {
 and the generated shortUrl url
 */
 
-func SaveUrlMapping(shortUrl string, originalUrl string, s *StorageService) error {
+func (s *StorageService) SaveUrlMapping(shortUrl string, originalUrl string) error {
 	//redis.SET store the url in cache memory
 	// we set the short url as the key and the original url as the value. This allows us to query for the original url using the short url
 	/*
@@ -79,7 +79,7 @@ url, so what we need to do here is to retrieve the long url and
 think about redirect.
 */
 
-func RetrieveInitialUrl(shortUrl string, s *StorageService) (string, error) {
+func (s *StorageService) RetrieveInitialUrl(shortUrl string) (string, error) {
 	result, err := s.redisClient.Get(shortUrl).Result()
 	if err != nil {
 		return "", fmt.Errorf("Failed RetrieveInitialUrl url | Error: %v - shortUrl: %s\n", err, shortUrl)

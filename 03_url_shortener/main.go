@@ -11,8 +11,11 @@ import (
 func main() {
 	r := gin.Default()
 
-	// Note that store initialization happens here
-	store := store.InitializeStore(store.Config{})
+	// Store initialization
+	storage := store.InitializeStore(store.Config{})
+
+	// now the httphandler has the redis instance inside it
+	httpHandler := handler.NewHttpHandler(storage)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -25,13 +28,9 @@ func main() {
 		In more complex apps, endpoints should be in separate files.
 	*/
 
-	r.POST("/create-short-url", func(c *gin.Context) {
-		handler.CreateShortUrl(c, store)
-	})
+	r.POST("/create-short-url", httpHandler.CreateShortUrl)
 
-	r.GET("/:shortUrl", func(c *gin.Context) {
-		handler.HandleShortUrlRedirect(c, store)
-	})
+	r.GET("/:shortUrl", httpHandler.HandleShortUrlRedirect)
 
 	err := r.Run(":9808")
 	if err != nil {

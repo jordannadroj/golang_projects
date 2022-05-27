@@ -14,7 +14,17 @@ type UrlCreationRequest struct {
 	LongUrl string `json:"long_url" binding:"required"` // binding is specific to gin
 }
 
-func CreateShortUrl(c *gin.Context, s *store.StorageService) {
+type HttpHandler struct {
+	storageService *store.StorageService
+}
+
+func NewHttpHandler(storage *store.StorageService) *HttpHandler {
+	return &HttpHandler{
+		storageService: storage,
+	}
+}
+
+func (h *HttpHandler) CreateShortUrl(c *gin.Context) {
 	var creationRequest UrlCreationRequest
 	// handle error
 	if err := c.ShouldBindJSON(&creationRequest); err != nil {
@@ -30,7 +40,7 @@ func CreateShortUrl(c *gin.Context, s *store.StorageService) {
 		log.Infof("error generating short URL: %q", err.Error())
 		return
 	}
-	err = store.SaveUrlMapping(shortUrl, creationRequest.LongUrl, s)
+	err = h.storageService.SaveUrlMapping(shortUrl, creationRequest.LongUrl)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		log.Infof("error saving URL to database: %q", err.Error())
@@ -44,11 +54,11 @@ func CreateShortUrl(c *gin.Context, s *store.StorageService) {
 	})
 }
 
-func HandleShortUrlRedirect(c *gin.Context, s *store.StorageService) {
+func (h *HttpHandler) HandleShortUrlRedirect(c *gin.Context) {
 	// c.Param will extract the param with the given key
 	// ex. /:shortUrl -> colon indicates param
 	shortUrl := c.Param("shortUrl")
-	initialUrl, err := store.RetrieveInitialUrl(shortUrl, s)
+	initialUrl, err := h.storageService.RetrieveInitialUrl(shortUrl)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		log.Infof("error retrieving URL from database: %q", err.Error())
