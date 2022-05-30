@@ -9,7 +9,7 @@ import (
 )
 
 type Config struct {
-	Host     string `envconfig:"HOST" default:"localhost:6379"`
+	Host     string `envconfig:"REDIS_HOST" default:"localhost:6379"`
 	Password string `envconfig:"PASSWORD" default:""`
 	DB       int    `envconfig:"DB" default:"0"`
 }
@@ -25,7 +25,7 @@ type StorageService struct {
 
 // Note that in a real world usage, the cache duration shouldn't have
 // an expiration time, an LRU policy config should be set where the
-// values that are retrieved less often are purged automatically from
+// values that are retrieved less often are purged automatistorelly from
 // the cache and stored back in RDBMS whenever the cache is full
 
 const CacheDuration = 6 * time.Hour

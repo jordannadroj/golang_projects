@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"os"
 	"url_shortener/pkg/shortener"
 	"url_shortener/store"
 )
@@ -46,11 +47,10 @@ func (h *HttpHandler) CreateShortUrl(c *gin.Context) {
 		log.Infof("error saving URL to database: %q", err.Error())
 		return
 	}
-
-	host := "http://localhost:9808/"
+	host := os.Getenv("APP_HOST")
 	c.JSON(http.StatusOK, gin.H{
 		"message":   "short url created successfully",
-		"short_url": host + shortUrl,
+		"short_url": host + "/" + shortUrl,
 	})
 }
 
@@ -66,5 +66,5 @@ func (h *HttpHandler) HandleShortUrlRedirect(c *gin.Context) {
 	}
 	// retrieve the original URL via the short URL key
 	// redirects to the path of the original url
-	c.Redirect(http.StatusFound, initialUrl)
+	c.Redirect(http.StatusMovedPermanently, initialUrl)
 }
