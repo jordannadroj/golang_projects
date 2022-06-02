@@ -3,14 +3,31 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"net/http"
+	"os"
 	"url_shortener/handler"
 	"url_shortener/store"
 )
 
 func main() {
+	// load .env file
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		panic("Error loading .env file")
+	}
+
 	r := gin.Default()
+
+	// Store initialization
+	storage := store.InitializeStore(store.Config{})
+
+	// now the httphandler has the redis instance inside it
+	httpHandler := handler.NewHttpHandler(storage)
+
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"message": "Welcome to the URL Shortener API",
 		})
 	})
@@ -20,18 +37,11 @@ func main() {
 		In more complex apps, endpoints should be in separate files.
 	*/
 
-	r.POST("/create-short-url", func(c *gin.Context) {
-		handler.CreateShortUrl(c)
-	})
+	r.POST("/create-short-url", httpHandler.CreateShortUrl)
 
-	r.GET("/:shortUrl", func(c *gin.Context) {
-		handler.HandleShortUrlRedirect(c)
-	})
+	r.GET("/:shortUrl", httpHandler.HandleShortUrlRedirect)
 
-	// Note that store initialization happens here
-	store.InitializeStore()
-
-	err := r.Run(":9808")
+	err = r.Run(os.Getenv("APP_HOST"))
 	if err != nil {
 		panic(fmt.Sprintf("Failed to start the web server - Error: %v", err))
 	}

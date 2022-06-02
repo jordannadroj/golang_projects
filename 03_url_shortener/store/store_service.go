@@ -1,10 +1,18 @@
 package store
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
+
+type Config struct {
+	Host     string `envconfig:"REDIS_HOST" default:"localhost:6379"`
+	Password string `envconfig:"PASSWORD" default:""`
+	DB       int    `envconfig:"DB" default:"0"`
+}
 
 /*
 We will start by setting up our wrappers around Redis, the wrappers will be used as interface for persisting and retrieving our application data mapping.
@@ -15,22 +23,19 @@ type StorageService struct {
 	redisClient *redis.Client
 }
 
-// Top level declarations for the storeService and Redis context
-var storeService = &StorageService{}
-
 // Note that in a real world usage, the cache duration shouldn't have
 // an expiration time, an LRU policy config should be set where the
-// values that are retrieved less often are purged automatically from
+// values that are retrieved less often are purged automatistorelly from
 // the cache and stored back in RDBMS whenever the cache is full
 
 const CacheDuration = 6 * time.Hour
 
 // Initializing the store service and return a store pointer
-func InitializeStore() *StorageService {
+func InitializeStore(cfg Config) *StorageService {
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
+		Addr:     cfg.Host,
+		Password: cfg.Password,
+		DB:       cfg.DB,
 	})
 
 	pong, err := redisClient.Ping().Result()
@@ -38,16 +43,16 @@ func InitializeStore() *StorageService {
 		panic(fmt.Sprintf("Error init Redis: %v", err))
 	}
 
-	fmt.Printf("\nRedis started successfully: pong message = {%s}", pong)
-	storeService.redisClient = redisClient
-	return storeService
+	//fmt.Printf("\nRedis started successfully: pong message = {%s}", pong)
+	log.Infof("Redis started successfully: pong message = {%s}", pong)
+	return &StorageService{redisClient: redisClient}
 }
 
 /* We want to be able to save the mapping between the originalUrl
 and the generated shortUrl url
 */
 
-func SaveUrlMapping(shortUrl string, originalUrl string) {
+func (s *StorageService) SaveUrlMapping(shortUrl string, originalUrl string) error {
 	//redis.SET store the url in cache memory
 	// we set the short url as the key and the original url as the value. This allows us to query for the original url using the short url
 	/*
@@ -56,11 +61,15 @@ func SaveUrlMapping(shortUrl string, originalUrl string) {
 			KEYS *
 			get <short_url>
 	*/
-	err := storeService.redisClient.Set(shortUrl, originalUrl, CacheDuration).Err()
-	if err != nil {
-		panic(fmt.Sprintf("Failed saving key url | Error: %v - shortUrl: %s - originalUrl: %s\n", err, shortUrl, originalUrl))
+	if shortUrl == "" {
+		return errors.New("short URL cannot be empty string")
 	}
 
+	err := s.redisClient.Set(shortUrl, originalUrl, CacheDuration).Err()
+	if err != nil {
+		return fmt.Errorf("Failed saving key url | Error: %v - shortUrl: %s - originalUrl: %s\n", err, shortUrl, originalUrl)
+	}
+	return nil
 }
 
 /*
@@ -70,10 +79,10 @@ url, so what we need to do here is to retrieve the long url and
 think about redirect.
 */
 
-func RetrieveInitialUrl(shortUrl string) string {
-	result, err := storeService.redisClient.Get(shortUrl).Result()
+func (s *StorageService) RetrieveInitialUrl(shortUrl string) (string, error) {
+	result, err := s.redisClient.Get(shortUrl).Result()
 	if err != nil {
-		panic(fmt.Sprintf("Failed RetrieveInitialUrl url | Error: %v - shortUrl: %s\n", err, shortUrl))
+		return "", fmt.Errorf("Failed RetrieveInitialUrl url | Error: %v - shortUrl: %s\n", err, shortUrl)
 	}
-	return result
+	return result, nil
 }
