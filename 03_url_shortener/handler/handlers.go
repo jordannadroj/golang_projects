@@ -2,11 +2,11 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/jordannadroj/52_in_52/03_url_shortener/pkg/shortener"
+	"github.com/jordannadroj/52_in_52/03_url_shortener/store"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
-	"url_shortener/pkg/shortener"
-	"url_shortener/store"
 )
 
 // Request model definition
