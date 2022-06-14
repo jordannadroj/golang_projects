@@ -3,10 +3,10 @@ package accu_weather
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jordannadroj/52_in_52/01_weather/pkg/weather"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"weather/pkg/weather"
 )
 
 const ACCU_URL = "https://dataservice.accuweather.com"
