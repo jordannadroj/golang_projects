@@ -1,13 +1,13 @@
 package open_weather_map
 
 import (
+	"github.com/jordannadroj/52_in_52/01_weather/pkg/weather"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
-	"weather/pkg/weather"
 )
 
 // this is not thread safe

@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	"github.com/joho/godotenv"
+	wet "github.com/jordannadroj/52_in_52/01_weather/pkg/weather"
+	"github.com/jordannadroj/52_in_52/01_weather/pkg/weather/providers/accu_weather"
+	"github.com/jordannadroj/52_in_52/01_weather/pkg/weather/providers/open_weather_map"
+	"github.com/jordannadroj/52_in_52/01_weather/view"
 	"log"
 	"os"
-	wet "weather/pkg/weather"
-	"weather/pkg/weather/providers/accu_weather"
-	"weather/pkg/weather/providers/open_weather_map"
-	"weather/view"
 )
 
 func main() {

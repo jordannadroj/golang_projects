@@ -3,9 +3,9 @@ package open_weather_map
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jordannadroj/52_in_52/01_weather/pkg/weather"
 	"io"
 	"io/ioutil"
-	"weather/pkg/weather"
 )
 
 const BASE_URL = "https://api.openweathermap.org/data/2.5"

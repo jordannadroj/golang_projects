@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/jordannadroj/52_in_52/03_url_shortener/handler"
+	"github.com/jordannadroj/52_in_52/03_url_shortener/store"
 	"net/http"
 	"os"
-	"url_shortener/handler"
-	"url_shortener/store"
 )
 
 func main() {
