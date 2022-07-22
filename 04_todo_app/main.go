@@ -21,7 +21,9 @@ func main() {
 	}
 
 	db := database.ConnectToDB(&database.Config{})
-	defer db.Close()
+	defer db.SqlDB.Close()
+
+	httpHandler := handler.NewHttpHandler(db)
 
 	engine := html.New("./views", ".html")
 
@@ -36,22 +38,13 @@ func main() {
 
 	app.Static("/public", "./public")
 
-	app.Get("/", func(ctx *fiber.Ctx) error {
-		return handler.IndexHandler(ctx, db)
-	})
+	app.Get("/", httpHandler.IndexHandler)
 
-	app.Post("/", func(ctx *fiber.Ctx) error {
-		return handler.PostHandler(ctx, db)
-	})
+	app.Post("/", httpHandler.PostHandler)
 
-	app.Put("/update", func(ctx *fiber.Ctx) error {
-		return handler.PutHandler(ctx, db)
-	})
+	app.Put("/update", httpHandler.PutHandler)
 
-	app.Delete("/delete", func(ctx *fiber.Ctx) error {
-		handler.DeleteHandler(ctx, db)
-		return nil
-	})
+	app.Delete("/delete", httpHandler.DeleteHandler)
 
 	// log.Fatalln will log the output in case of any errors.
 	log.Fatalln(app.Listen(fmt.Sprintf(":%v", port)))

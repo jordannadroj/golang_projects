@@ -16,7 +16,11 @@ type Config struct {
 	DB       string `envconfig:"DB_NAME" `
 }
 
-func ConnectToDB(cfg *Config) *sql.DB {
+type Database struct {
+	SqlDB *sql.DB
+}
+
+func ConnectToDB(cfg *Config) *Database {
 	if err := envconfig.Init(cfg); err != nil {
 		log.Fatalln(err)
 	}
@@ -37,5 +41,5 @@ func ConnectToDB(cfg *Config) *sql.DB {
 
 	fmt.Println("Successfully connected!")
 
-	return db
+	return &Database{SqlDB: db}
 }
