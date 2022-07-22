@@ -44,7 +44,7 @@ func PostHandler(c *fiber.Ctx, db *sql.DB) error {
 		if err != nil {
 			log.Printf("An error occured while executing query: %v", err)
 		}
-		log.Printf("Row added to databse 'todos' with value %v", newTodo.Item)
+		log.Printf("Row added to database 'todos' with value %q", newTodo.Item)
 	}
 
 	return c.Redirect("/")
@@ -53,10 +53,22 @@ func PostHandler(c *fiber.Ctx, db *sql.DB) error {
 func PutHandler(c *fiber.Ctx, db *sql.DB) error {
 	olditem := c.Query("olditem")
 	newitem := c.Query("newitem")
-	db.Exec("UPDATE todos SET item=$1 WHERE item=$2", newitem, olditem)
-	return c.Redirect("/")
+	_, err := db.Exec("UPDATE todos SET item=$1 WHERE item=$2", newitem, olditem)
+	if err != nil {
+		log.Errorf("An error occured while executing query: %v", err)
+		return c.SendString(err.Error())
+	}
+	log.Infof("Item %q updated to %q", olditem, newitem)
+	return nil
 }
 
 func DeleteHandler(c *fiber.Ctx, db *sql.DB) error {
-	return c.SendString("wassup")
+	deleteItem := c.Query("item")
+	_, err := db.Exec("DELETE FROM todos WHERE item=$1", deleteItem)
+	if err != nil {
+		log.Errorf("An error occured while executing query: %v", err)
+		return c.SendString(err.Error())
+	}
+	log.Infof("%v deleted", deleteItem)
+	return nil
 }
