@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  url_shortener:
+    build: .
+    image: url_shortener:latest
+    container_name: url_shortener
+    ports:
+      - '8080:8080'
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis:6379
+      - APP_HOST="0.0.0.0:8080"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: redis
+
+  ubuntu:
+    image: osexp2000/ubuntu-with-utils
+    container_name: ubuntu
+    entrypoint:
+      - sleep
+      - infinity

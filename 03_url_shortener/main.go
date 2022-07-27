@@ -3,21 +3,12 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"github.com/jordannadroj/52_in_52/03_url_shortener/handler"
 	"github.com/jordannadroj/52_in_52/03_url_shortener/store"
 	"net/http"
-	"os"
 )
 
 func main() {
-	// load .env file
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		panic("Error loading .env file")
-	}
-
 	r := gin.Default()
 
 	// Store initialization
@@ -41,7 +32,7 @@ func main() {
 
 	r.GET("/:shortUrl", httpHandler.HandleShortUrlRedirect)
 
-	err = r.Run(os.Getenv("APP_HOST"))
+	err := r.Run()
 	if err != nil {
 		panic(fmt.Sprintf("Failed to start the web server - Error: %v", err))
 	}
