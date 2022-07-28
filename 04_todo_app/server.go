@@ -33,8 +33,7 @@ func main() {
 	if port == "" {
 		port = "3000"
 	}
-
-	app.Static("/public", "./public")
+	app.Static("/public", "./public") // add this before starting the app
 
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		return handler.IndexHandler(ctx, db)
@@ -49,10 +48,10 @@ func main() {
 	})
 
 	app.Delete("/delete", func(ctx *fiber.Ctx) error {
-		handler.DeleteHandler(ctx, db)
-		return nil
+		return handler.DeleteHandler(ctx, db)
 	})
 
-	// log.Fatalln will log the output in case of any errors.
+	// this needs to be below all the HTTP requests in order to work properly.
+	// lof.Fatalln will log the output in case of any errors.
 	log.Fatalln(app.Listen(fmt.Sprintf(":%v", port)))
 }

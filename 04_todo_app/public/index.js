@@ -11,6 +11,7 @@ function updateDb(item) {
     let newitem = input.value
     fetch(`/update?olditem=${item}&newitem=${newitem}`, {method: "PUT"}).then(res =>{
         if (res.status == 200){
+            alert("Database updated")
             window.location.pathname = "/"
         }
     })
