@@ -1,8 +1,8 @@
 package handler
 
 import (
+	"database/sql"
 	"github.com/gofiber/fiber/v2"
-	"github.com/jordannadroj/52_in_52/04_todo_app/db"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -10,21 +10,11 @@ type todo struct {
 	Item string
 }
 
-type HttpHandler struct {
-	database *db.Database
-}
-
-func NewHttpHandler(database *db.Database) *HttpHandler {
-	return &HttpHandler{
-		database: database,
-	}
-}
-
-func (h *HttpHandler) IndexHandler(c *fiber.Ctx) error {
+func IndexHandler(c *fiber.Ctx, db *sql.DB) error {
 	var res string
 	var todos []string
 
-	rows, err := h.database.SqlDB.Query("SELECT * FROM todos") // return all rows that are returned by query
+	rows, err := db.Query("SELECT * FROM todos") // return all rows that are returned by query
 	defer rows.Close()
 	if err != nil {
 		log.Fatalln(err)
@@ -40,7 +30,7 @@ func (h *HttpHandler) IndexHandler(c *fiber.Ctx) error {
 }
 
 // there is a form in the html file with action POST
-func (h *HttpHandler) PostHandler(c *fiber.Ctx) error {
+func PostHandler(c *fiber.Ctx, db *sql.DB) error {
 	//	add a new todo to the list in the db
 	//	render the todos again with the list
 	newTodo := todo{}
@@ -50,7 +40,7 @@ func (h *HttpHandler) PostHandler(c *fiber.Ctx) error {
 	}
 
 	if newTodo.Item != "" {
-		_, err := h.database.SqlDB.Exec("INSERT INTO todos VALUES ($1)", newTodo.Item)
+		_, err := db.Exec("INSERT INTO todos VALUES ($1)", newTodo.Item)
 		if err != nil {
 			log.Printf("An error occured while executing query: %v", err)
 		}
@@ -60,10 +50,10 @@ func (h *HttpHandler) PostHandler(c *fiber.Ctx) error {
 	return c.Redirect("/")
 }
 
-func (h *HttpHandler) PutHandler(c *fiber.Ctx) error {
+func PutHandler(c *fiber.Ctx, db *sql.DB) error {
 	olditem := c.Query("olditem")
 	newitem := c.Query("newitem")
-	_, err := h.database.SqlDB.Exec("UPDATE todos SET item=$1 WHERE item=$2", newitem, olditem)
+	_, err := db.Exec("UPDATE todos SET item=$1 WHERE item=$2", newitem, olditem)
 	if err != nil {
 		log.Errorf("An error occured while executing query: %v", err)
 		return c.SendString(err.Error())
@@ -72,9 +62,9 @@ func (h *HttpHandler) PutHandler(c *fiber.Ctx) error {
 	return nil
 }
 
-func (h *HttpHandler) DeleteHandler(c *fiber.Ctx) error {
+func DeleteHandler(c *fiber.Ctx, db *sql.DB) error {
 	deleteItem := c.Query("item")
-	_, err := h.database.SqlDB.Exec("DELETE FROM todos WHERE item=$1", deleteItem)
+	_, err := db.Exec("DELETE FROM todos WHERE item=$1", deleteItem)
 	if err != nil {
 		log.Errorf("An error occured while executing query: %v", err)
 		return c.SendString(err.Error())
