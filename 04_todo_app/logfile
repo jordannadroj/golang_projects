@@ -1,0 +1,22 @@
+2022-07-23 14:56:52.929 CEST [45972] LOG:  starting PostgreSQL 14.3 on x86_64-apple-darwin21.5.0, compiled by Apple clang version 13.1.6 (clang-1316.0.21.2.5), 64-bit
+2022-07-23 14:56:52.932 CEST [45972] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2022-07-23 14:56:52.932 CEST [45972] LOG:  listening on IPv6 address "::1", port 5432
+2022-07-23 14:56:52.932 CEST [45972] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2022-07-23 14:56:52.935 CEST [45973] LOG:  database system was shut down at 2022-07-23 14:56:48 CEST
+2022-07-23 14:56:52.937 CEST [45972] LOG:  database system is ready to accept connections
+2022-07-23 14:57:03.721 CEST [45998] FATAL:  database "pos" does not exist
+2022-07-23 14:57:16.362 CEST [46013] ERROR:  relation "postgres" does not exist at character 15
+2022-07-23 14:57:16.362 CEST [46013] STATEMENT:  SELECT * FROM postgres;
+2022-07-23 15:00:40.341 CEST [46106] FATAL:  database "Jordan" does not exist
+2022-07-23 15:01:41.224 CEST [46155] ERROR:  syntax error at or near ";" at character 19
+2022-07-23 15:01:41.224 CEST [46155] STATEMENT:  CREATE TABLE todos;
+2022-07-23 15:02:43.351 CEST [46333] ERROR:  syntax error at or near ";" at character 38
+2022-07-23 15:02:43.351 CEST [46333] STATEMENT:  CREATE TABLE todo (
+	item varchar(255);
+	);
+2022-07-23 15:03:30.443 CEST [46451] FATAL:  database "postgreat" does not exist
+2022-07-23 15:04:30.278 CEST [46460] ERROR:  syntax error at or near "item" at character 19
+2022-07-23 15:04:30.278 CEST [46460] STATEMENT:  INSERT INTO todos item VALUES 'laundry';
+2022-07-23 15:07:22.555 CEST [46557] ERROR:  syntax error at or near "/" at character 1
+2022-07-23 15:07:22.555 CEST [46557] STATEMENT:  /du
+	;
