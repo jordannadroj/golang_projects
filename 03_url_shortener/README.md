@@ -24,8 +24,18 @@ go get
 
 [Installing Redis](https://redis.io/docs/getting-started/installation/)
 
+## Run Application with Docker
+Build docker image
+```shell
+docker build -t url_shortener .
+```
 
-## Run Application
+Run Docker
+```shell
+docker compose up
+```
+
+## Run Application Locally
 
 ### Start Redis Server
 Open a terminal and run:

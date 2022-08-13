@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	log "github.com/sirupsen/logrus"
+	"os"
 	"time"
 )
 
@@ -33,13 +34,14 @@ const CacheDuration = 6 * time.Hour
 // Initializing the store service and return a store pointer
 func InitializeStore(cfg Config) *StorageService {
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     cfg.Host,
+		Addr:     os.Getenv("REDIS_HOST"),
 		Password: cfg.Password,
 		DB:       cfg.DB,
 	})
 
 	pong, err := redisClient.Ping().Result()
 	if err != nil {
+		fmt.Println(os.Environ())
 		panic(fmt.Sprintf("Error init Redis: %v", err))
 	}
 
