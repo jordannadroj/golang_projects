@@ -1,16 +1,16 @@
-function removeFromDb(item){
-    fetch(`/api/todo?item=${item}`, {method: "Delete"}).then(res =>{
+function removeFromDb(item_id){
+    fetch(`/api/todo?item=${item_id}`, {method: "Delete"}).then(res =>{
         if (res.status == 200){
             window.location.pathname = "/"
         }
     })
 }
 
-function updateDb(item) {
-    let input = document.getElementById(item)
+function updateDb(item_id) {
+    let input = document.getElementById(item_id)
     let newitem = input.value
     const data={
-        "olditem": item,
+        "olditem": item_id,
         "newitem": newitem
     };
 
