@@ -1,5 +1,5 @@
 function removeFromDb(item){
-    fetch(`/delete?item=${item}`, {method: "Delete"}).then(res =>{
+    fetch(`/api/todo?item=${item}`, {method: "Delete"}).then(res =>{
         if (res.status == 200){
             window.location.pathname = "/"
         }
@@ -9,7 +9,22 @@ function removeFromDb(item){
 function updateDb(item) {
     let input = document.getElementById(item)
     let newitem = input.value
-    fetch(`/update?olditem=${item}&newitem=${newitem}`, {method: "PUT"}).then(res =>{
+    const data={
+        "olditem": item,
+        "newitem": newitem
+    };
+
+    fetch(`/api/todo`, {method: "PUT",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)})
+        .then((response) => response.json())
+        .then((data) => {
+            console.log('Success:', data);
+        })
+        .then(res =>{
         if (res.status == 200){
             window.location.pathname = "/"
         }

@@ -40,11 +40,11 @@ func main() {
 
 	app.Get("/", httpHandler.IndexHandler)
 
-	app.Post("/", httpHandler.PostHandler)
+	app.Post("/api/todo", httpHandler.PostHandler)
 
-	app.Put("/update", httpHandler.PutHandler)
+	app.Put("/api/todo", httpHandler.PutHandler)
 
-	app.Delete("/delete", httpHandler.DeleteHandler)
+	app.Delete("/api/todo", httpHandler.DeleteHandler)
 
 	// log.Fatalln will log the output in case of any errors.
 	log.Fatalln(app.Listen(fmt.Sprintf(":%v", port)))

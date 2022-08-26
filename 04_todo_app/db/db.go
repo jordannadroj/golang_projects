@@ -21,6 +21,11 @@ type Database struct {
 	SqlDB *sql.DB
 }
 
+type Todo struct {
+	ID   int
+	item string
+}
+
 // Establishes a connection to a SQL database
 func ConnectToDB(cfg *Config) *Database {
 	if err := envconfig.Init(cfg); err != nil {
@@ -47,22 +52,24 @@ func ConnectToDB(cfg *Config) *Database {
 }
 
 // Queries all rows of the database and returns a list of items
-func (db *Database) ListItems(response string, list []string) ([]string, error) {
+func (db *Database) ListItems() ([]string, error) {
+	todo := Todo{}
+	var todos []string
 	rows, err := db.SqlDB.Query("SELECT * FROM todos")
 	defer rows.Close()
 	if err != nil {
 		log.Fatalln(err)
-		return list, errors.New("error retrieving items from DB")
+		return todos, errors.New("error retrieving items from DB")
 	}
 	for rows.Next() { // read each row
-		rows.Scan(&response)          // Scan() copies the row into a dedicated pointer variable
-		list = append(list, response) // append each row to the todos array
+		rows.Scan(&todo.ID, &todo.item)  // Scan() copies the row into a dedicated pointer variable
+		todos = append(todos, todo.item) // append each row to the todos array
 	}
-	return list, nil
+	return todos, nil
 }
 
 func (db *Database) AddItem(item string) error {
-	_, err := db.SqlDB.Exec("INSERT INTO todos VALUES ($1)", item)
+	_, err := db.SqlDB.Exec("INSERT INTO todos(id,item) VALUES (DEFAULT,$1)", item)
 	if err != nil {
 		return err
 	}
