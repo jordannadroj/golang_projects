@@ -69,9 +69,12 @@ func (db *Database) ListItems() ([]Todo, error) {
 }
 
 func (db *Database) AddItem(item string) error {
-	_, err := db.SqlDB.Exec("INSERT INTO todos(id,item) VALUES (DEFAULT,$1)", item)
+	result, err := db.SqlDB.Exec("INSERT INTO todos(id,item) VALUES (DEFAULT,$1)", item)
 	if err != nil {
 		return err
+	}
+	if rows, _ := result.RowsAffected(); rows == 0 {
+		return errors.New("one row must have been affected")
 	}
 	return nil
 }

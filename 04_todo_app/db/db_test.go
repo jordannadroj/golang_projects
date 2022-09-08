@@ -2,6 +2,7 @@ package db
 
 import (
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 	"testing"
 )
 
@@ -19,16 +20,35 @@ func TestListItems(t *testing.T) {
 	db, mock, _ := sqlmock.New()
 	mockDB := Database{db}
 
-	//mockDB.AddItem("test_item")
-	//got, _ := db.Exec("SELECT item FROM todos WHERE ITEM='test_item'")
-	//assert.Equal(t, "test_item", got)
-	mock.ExpectQuery("SELECT * FROM todos").WillReturnRows(sqlmock.NewRows([]string{"item"}))
+	rows := sqlmock.NewRows([]string{"id", "item"}).
+		AddRow(1, "laundry").
+		AddRow(2, "pay bills")
 
-	var res string
-	var list []string
+	mock.ExpectQuery("SELECT").WillReturnRows(rows)
 
-	resp, err := mockDB.ListItems(res, list)
-	assert.Nil(t, err)
-	assert.NotNil(t, resp)
-	assert.Equal(t, 1, len(resp))
+	todos, err := mockDB.ListItems()
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+	assert.NotNil(t, todos)
+	assert.NoError(t, err)
+
+}
+
+func TestAddItem(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+	mockDB := Database{db}
+
+	mock.ExpectExec("INSERT INTO todos").
+		WithArgs("laundry").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	if err := mockDB.AddItem("laundry"); err != nil {
+		t.Errorf("error not expected while updating DB")
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
 }
