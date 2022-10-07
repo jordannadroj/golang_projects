@@ -18,7 +18,7 @@ type Config struct {
 }
 
 type Database struct {
-	SqlDB *sql.DB
+	sqlDB *sql.DB
 }
 
 type Todo struct {
@@ -48,20 +48,24 @@ func ConnectToDB(cfg *Config) *Database {
 
 	fmt.Println("Successfully connected!")
 
-	return &Database{SqlDB: db}
+	return &Database{sqlDB: db}
+}
+
+func (db *Database) CloseDB() {
+	db.sqlDB.Close()
 }
 
 // Queries all rows of the database and returns a list of items
 func (db *Database) ListItems() ([]Todo, error) {
-	todo := Todo{}
 	var todos []Todo
-	rows, err := db.SqlDB.Query("SELECT * FROM todos")
+	rows, err := db.sqlDB.Query("SELECT * FROM todos")
 	defer rows.Close()
 	if err != nil {
 		log.Fatalln(err)
 		return todos, errors.New("error retrieving items from DB")
 	}
 	for rows.Next() { // read each row
+		todo := Todo{}
 		rows.Scan(&todo.ID, &todo.Item) // Scan() copies the row into a dedicated pointer variable
 		todos = append(todos, todo)     // append each row to the todos array
 	}
@@ -69,28 +73,40 @@ func (db *Database) ListItems() ([]Todo, error) {
 }
 
 func (db *Database) AddItem(item string) error {
-	result, err := db.SqlDB.Exec("INSERT INTO todos(id,item) VALUES (DEFAULT,$1)", item)
+	res, err := db.sqlDB.Exec("INSERT INTO todos(id,item) VALUES (DEFAULT,$1)", item)
+	rows, err2 := res.RowsAffected()
 	if err != nil {
 		return err
-	}
-	if rows, _ := result.RowsAffected(); rows == 0 {
-		return errors.New("one row must have been affected")
+	} else if err2 != nil {
+		return err2
+	} else if rows == 0 {
+		return errors.New("error when adding item to database")
 	}
 	return nil
 }
 
 func (db *Database) UpdateItem(oldItem, newItem string) error {
-	_, err := db.SqlDB.Exec("UPDATE todos SET item=$1 WHERE id=$2", newItem, oldItem)
+	res, err := db.sqlDB.Exec("UPDATE todos SET item=$1 WHERE id=$2", newItem, oldItem)
+	rows, err2 := res.RowsAffected()
 	if err != nil {
 		return err
+	} else if err2 != nil {
+		return err2
+	} else if rows == 0 {
+		return errors.New("error when updating item oin database")
 	}
 	return nil
 }
 
 func (db *Database) DeleteItem(itemID string) error {
-	_, err := db.SqlDB.Exec("DELETE FROM todos WHERE id=$1", itemID)
+	res, err := db.sqlDB.Exec("DELETE FROM todos WHERE id=$1", itemID)
+	rows, err2 := res.RowsAffected()
 	if err != nil {
 		return err
+	} else if err2 != nil {
+		return err2
+	} else if rows == 0 {
+		return errors.New("error when deleting item from database")
 	}
 	return nil
 }

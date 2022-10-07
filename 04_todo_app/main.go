@@ -12,18 +12,7 @@ import (
 	"os"
 )
 
-func main() {
-	//load .env file
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		panic("Error loading .env file")
-	}
-
-	db := database.ConnectToDB(&database.Config{})
-	defer db.SqlDB.Close()
-
-	httpHandler := handler.NewHttpHandler(db)
+func StartApp(handler handler.HttpHandler) *fiber.App {
 
 	engine := html.New("./views", ".html")
 
@@ -31,20 +20,37 @@ func main() {
 		Views: engine,
 	})
 
+	app.Static("/public", "./public")
+
+	app.Get("/", handler.IndexHandler)
+
+	app.Post("/api/todo", handler.PostHandler)
+
+	app.Put("/api/todo", handler.PutHandler)
+
+	app.Delete("/api/todo", handler.DeleteHandler)
+
+	return app
+}
+
+func main() {
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		panic("Error loading .env file")
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3000"
 	}
 
-	app.Static("/public", "./public")
+	db := database.ConnectToDB(&database.Config{})
+	defer db.CloseDB()
 
-	app.Get("/", httpHandler.IndexHandler)
+	httpHandler := handler.NewHttpHandler(db)
 
-	app.Post("/api/todo", httpHandler.PostHandler)
-
-	app.Put("/api/todo", httpHandler.PutHandler)
-
-	app.Delete("/api/todo", httpHandler.DeleteHandler)
+	app := StartApp(*httpHandler)
 
 	// log.Fatalln will log the output in case of any errors.
 	log.Fatalln(app.Listen(fmt.Sprintf(":%v", port)))

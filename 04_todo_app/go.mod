@@ -3,6 +3,7 @@ module github.com/jordannadroj/52_in_52/04_todo_app
 go 1.18
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/gofiber/fiber/v2 v2.36.0
 	github.com/gofiber/template v1.6.30
 	github.com/joho/godotenv v1.4.0
