@@ -1,6 +1,8 @@
 package db
 
 import (
+	"fmt"
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -18,17 +20,93 @@ func TestDBInit(t *testing.T) {
 func TestListItems(t *testing.T) {
 	db, mock, _ := sqlmock.New()
 	mockDB := Database{db}
+	defer mockDB.sqlDB.Close()
 
-	//mockDB.AddItem("test_item")
-	//got, _ := db.Exec("SELECT item FROM todos WHERE ITEM='test_item'")
-	//assert.Equal(t, "test_item", got)
-	mock.ExpectQuery("SELECT * FROM todos").WillReturnRows(sqlmock.NewRows([]string{"item"}))
+	rows := mock.NewRows([]string{"id", "title"}).
+		AddRow(1, "laundry").AddRow(2, "second todo")
+	mock.ExpectQuery("SELECT").WillReturnRows(rows)
 
-	var res string
-	var list []string
+	resp, err := mockDB.ListItems()
 
-	resp, err := mockDB.ListItems(res, list)
+	for _, item := range resp {
+		fmt.Println(item)
+	}
+
 	assert.Nil(t, err)
 	assert.NotNil(t, resp)
-	assert.Equal(t, 1, len(resp))
+	assert.Equal(t, 2, len(resp))
+}
+
+func TestAddIem(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+	mockDB := Database{db}
+	defer mockDB.sqlDB.Close()
+
+	mock.ExpectExec("INSERT INTO todos").WithArgs("laundry").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	err := mockDB.AddItem("laundry")
+
+	assert.NoError(t, err)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestAddIemError(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+	mockDB := Database{db}
+	defer mockDB.sqlDB.Close()
+
+	mock.ExpectExec("INSERT INTO todos").WithArgs("laundry").
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	err := mockDB.AddItem("laundry")
+
+	assert.Error(t, err)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestUpdateItem(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+	mockDB := Database{db}
+	defer mockDB.sqlDB.Close()
+
+	_ = mock.NewRows([]string{"id", "title"}).
+		AddRow(1, "laundry")
+
+	mock.ExpectExec("UPDATE todos").WithArgs("laundry edit", "1").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	err := mockDB.UpdateItem("1", "laundry edit")
+
+	assert.NoError(t, err)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestDeleteItem(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+	mockDB := Database{db}
+	defer mockDB.sqlDB.Close()
+
+	_ = mock.NewRows([]string{"id", "title"}).
+		AddRow(1, "laundry").AddRow(2, "second todo")
+
+	mock.ExpectExec("DELETE FROM todos").WithArgs("1").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	err := mockDB.DeleteItem("1")
+
+	assert.NoError(t, err)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
 }

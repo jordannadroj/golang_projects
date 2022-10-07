@@ -18,10 +18,11 @@ type updateTodo struct {
 }
 
 type HttpHandler struct {
-	database *db.Database
+	database db.TodoDatabase
 }
 
-func NewHttpHandler(database *db.Database) *HttpHandler {
+// NewHttpHandler takes the TodoDatabase interface to create a handler with any supported db takes the TodoDatabse interface to create a handler with any supported db
+func NewHttpHandler(database db.TodoDatabase) *HttpHandler {
 	return &HttpHandler{
 		database: database,
 	}
