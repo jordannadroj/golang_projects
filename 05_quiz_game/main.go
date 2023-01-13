@@ -25,13 +25,16 @@ func main() {
 	flag.Parse()
 	done := make(chan bool)
 
-	go func() {
-		//	records score
-		questions, err := read_csv.ReadCsvFile(fileFlag, &numQuestions)
-		if err != nil {
-			return
-		}
+	//	Read from CSV file and retrieve questions
+	questions, err := read_csv.ReadCsvFile(fileFlag, &numQuestions)
+	if err != nil {
+		return
+	}
 
+	var start time.Time
+
+	go func() {
+		start = time.Now()
 		qsts.AskQuestions(questions, &score)
 		done <- true
 	}()
@@ -41,6 +44,6 @@ func main() {
 		fmt.Println()
 		fmt.Printf("time's up. Score: %d/%d\n", score, numQuestions)
 	case <-done:
-		fmt.Printf("You scored %d/%d\n", score, numQuestions)
+		fmt.Printf("You scored %d/%d in %.2f seconds \n", score, numQuestions, time.Now().Sub(start).Seconds())
 	}
 }
